@@ -1,17 +1,17 @@
-import { Backend_URL } from "@/lib/Constants";
-import { NextAuthOptions } from "next-auth";
-import { JWT } from "next-auth/jwt";
-import NextAuth from "next-auth/next";
-import CredentialsProvider from "next-auth/providers/credentials";
+import { Backend_URL } from '@/lib/Constants';
+import { NextAuthOptions } from 'next-auth';
+import { JWT } from 'next-auth/jwt';
+import NextAuth from 'next-auth/next';
+import CredentialsProvider from 'next-auth/providers/credentials';
 
 async function refreshToken(token: JWT): Promise<JWT> {
-  const res = await fetch(Backend_URL + "/auth/refresh", {
-    method: "POST",
+  const res = await fetch(Backend_URL + '/auth/refresh', {
+    method: 'POST',
     headers: {
       authorization: `Refresh ${token.backendTokens.refreshToken}`,
     },
   });
-  console.log("refreshed");
+  console.log('refreshed');
 
   const response = await res.json();
 
@@ -24,26 +24,26 @@ async function refreshToken(token: JWT): Promise<JWT> {
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
-      name: "Credentials",
+      name: 'Credentials',
       credentials: {
         username: {
-          label: "Username",
-          type: "text",
-          placeholder: "jsmith",
+          label: 'Username',
+          type: 'text',
+          placeholder: 'simon',
         },
-        password: { label: "Password", type: "password" },
+        password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials, req) {
         if (!credentials?.username || !credentials?.password) return null;
         const { username, password } = credentials;
-        const res = await fetch(Backend_URL + "/auth/login", {
-          method: "POST",
+        const res = await fetch(Backend_URL + '/auth/login', {
+          method: 'POST',
           body: JSON.stringify({
             username,
             password,
           }),
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
           },
         });
         if (res.status == 401) {
@@ -61,8 +61,7 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) return { ...token, ...user };
 
-      if (new Date().getTime() < token.backendTokens.expiresIn)
-        return token;
+      if (new Date().getTime() < token.backendTokens.expiresIn) return token;
 
       return await refreshToken(token);
     },
